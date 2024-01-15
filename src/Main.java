@@ -9,7 +9,7 @@ public class Main {
     static BlockingQueue<String> textsA = new ArrayBlockingQueue<>(100);
     static BlockingQueue<String> textsB = new ArrayBlockingQueue<>(100);
     static BlockingQueue<String> textsC = new ArrayBlockingQueue<>(100);
-    static int maxSizeA = 0, maxSizeB = 0, maxSizeC = 0;
+    static int[] maxSizeA = {0}, maxSizeB = {0}, maxSizeC = {0};
     static final int size = 10_000;
 
     public static void main(String[] args) throws InterruptedException {
@@ -26,87 +26,49 @@ public class Main {
             }
         }).start();
 
-        Runnable logicA = () -> {
-            for (int i = 0; i < size; i++) {
-                int count = 0;
-                String str;
-                try {
-                    str = textsA.take();
-                    for (int j = 0; j < str.length(); j++) {
-                        if (str.charAt(j) == 'a') {
-                            count++;
-                        }
-                    }
-
-                    if (count > maxSizeA) {
-                        maxSizeA = count;
-                    }
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        };
-        Thread threadA = new Thread(logicA);
-        threads.add(threadA);
-        threadA.start();
-
-        Runnable logicB = () -> {
-            for (int i = 0; i < size; i++) {
-                int count = 0;
-                String str;
-                try {
-                    str = textsB.take();
-                    for (int j = 0; j < str.length(); j++) {
-                        if (str.charAt(j) == 'b') {
-                            count++;
-                        }
-                    }
-                    if (count > maxSizeB) {
-                        maxSizeB = count;
-                    }
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        };
-        Thread threadB = new Thread(logicB);
-        threads.add(threadB);
-        threadB.start();
-
-
-        Runnable logicC = () -> {
-            for (int i = 0; i < size; i++) {
-                int count = 0;
-                String str;
-                try {
-                    str = textsC.take();
-                    for (int j = 0; j < str.length(); j++) {
-                        if (str.charAt(j) == 'c') {
-                            count++;
-                        }
-                    }
-                    if (count > maxSizeC) {
-                        maxSizeC = count;
-                    }
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        };
-        Thread threadC = new Thread(logicC);
-        threads.add(threadC);
-        threadC.start();
+        runLogic('a', textsA, maxSizeA);
+        runLogic('b', textsB, maxSizeB);
+        runLogic('c', textsC, maxSizeC);
 
         for (Thread thread : threads) {
             thread.join();
         }
 
-        System.out.println("Mаксимально сивмолов - а: " + maxSizeA);
-        System.out.println("Mаксимально сивмолов - b: " + maxSizeB);
-        System.out.println("Mаксимально сивмолов - c: " + maxSizeC);
-
+        System.out.println("Mаксимально символов - a: " + maxSizeA[0]);
+        System.out.println("Mаксимально символов - b: " + maxSizeB[0]);
+        System.out.println("Mаксимально символов - c: " + maxSizeC[0]);
     }
 
+    private static void runLogic(char letter, BlockingQueue<String> texts, int[] maxSize) {
+        Runnable logic = () -> {
+            for (int i = 0; i < size; i++) {
+                int count = 0;
+                String str;
+                try {
+                    str = texts.take();
+                    count = countOccurrences(str, letter);
+                    if (count > maxSize[0]) {
+                        maxSize[0] = count;
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        Thread thread = new Thread(logic);
+        threads.add(thread);
+        thread.start();
+    }
+
+    private static int countOccurrences(String str, char letter) {
+        int count = 0;
+        for (int j = 0; j < str.length(); j++) {
+            if (str.charAt(j) == letter) {
+                count++;
+            }
+        }
+        return count;
+    }
 
     public static String generateText(String letters, int length) {
         Random random = new Random();
