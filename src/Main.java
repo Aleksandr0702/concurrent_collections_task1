@@ -9,7 +9,7 @@ public class Main {
     static BlockingQueue<String> textsA = new ArrayBlockingQueue<>(100);
     static BlockingQueue<String> textsB = new ArrayBlockingQueue<>(100);
     static BlockingQueue<String> textsC = new ArrayBlockingQueue<>(100);
-    static int[] maxSizeA = {0}, maxSizeB = {0}, maxSizeC = {0};
+    static int[] maxSizeA = {0}, maxSizeB = {0}, maxSizeC = {0};  // Используем массивы
     static final int size = 10_000;
 
     public static void main(String[] args) throws InterruptedException {
